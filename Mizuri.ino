@@ -24,6 +24,14 @@ void initWiFi() {
   Serial.println(WiFi.localIP());
 }
 
+void notifyClient(const char* title, const char* message) {
+    StaticJsonDocument<512> notification; 
+    notification["token"] = apiToken;
+    notification["user"] = userToken; 
+    notification["message"] = message; 
+    notification["title"] = title; 
+}
+
 void setup() {
   initWiFi();
 }
@@ -35,21 +43,21 @@ void loop() {
     WiFi.reconnect();
     delay(1000);
     while (WiFi.status() != WL_CONNECTED) {
-      // alarm
-      Serial.println("Alarm!");
+      notifyClient("Warning", "Connection lost")
+      Serial.println("");
+      delay(2000);
     }
   }
   else if (sinceResponds < respondsInterval) {
     sinceResponds = 0;
   }
   else {
-    StaticJsonDocument<512> notification; 
-    notification["token"] = apiToken; //required
-    notification["user"] = userToken; //required
-    notification["message"] = "Hello from ESP32"; //required
-    notification["title"] = "ESP32 Notification"; //optional
-    
+    // if moisture
+    if (false) {
+      notifyClient("Warning", "Moisture detected")
+      delay(5000);
+    }
     sinceResponds++;
-    delay(10);
+    delay(50);
   }
 }
