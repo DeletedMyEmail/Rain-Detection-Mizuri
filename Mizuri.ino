@@ -35,15 +35,23 @@ const char *PUSHOVER_ROOT_CA = "-----BEGIN CERTIFICATE-----\n"
 unsigned long sinceResponds = 0;
 unsigned long respondsInterval = 100; 
 
+// TODO: idk which pins are connected
+const int sensorPowerPin;
+const int digitalSensorPin;
+const int analogSensorPin;
+
 void setup() {
   Serial.begin(115200);
-  Serial.println("Guten Morgen");
+  pinMode(sensorPowerPin, OUTPUT);
+  pinMode(digitalSensorPin, INPUT);
+  pinMode(analogSensorPin, INPUT);
   initWiFi();
   notifyClient("Info", "Moisture Sensor Mizuri Online!");
 }
 
 void loop() {
-  Serial.println("Loop");
+  digitalWrite(sensorPowerPin, HIGH);
+  
   if (sinceResponds < respondsInterval && WiFi.status() != WL_CONNECTED) {
     Serial.println("Reconnecting to WiFi...");
     WiFi.disconnect();
@@ -51,24 +59,21 @@ void loop() {
     delay(1000);
     while (WiFi.status() != WL_CONNECTED) {
       notifyClient("Warning", "Connection lost");
-      Serial.println("Connection lost");
-      delay(10000);
+      delay(5000);
     }
   }
   else if (sinceResponds < respondsInterval) {
     sinceResponds = 0;
   }
   else {
-    // if moisture
-    if (false) {
-      Serial.println("Moisture detected");
-      notifyClient("Warning", "Moisture detected");
-      delay(10000);
+    if (digitalRead(digitalSensorPin) == 0) {
+      notifyClient("Warning", "Moisture detected! Analog value: " + analogRead(analogSensorPin));
     }
     sinceResponds++;
-    delay(50);
   }
-  delay(3000);
+  
+  digitalWrite(sensorPowerPin, LOW);
+  delay(8000);
 }
 
 void initWiFi() {
