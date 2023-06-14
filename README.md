@@ -13,3 +13,6 @@ The next step is a motor that automatically closes the window through which it r
 - ESP32 (Wifi Dev Kit V1)
 - Arduino Rain Sensor (e.g. Modul FC-37)
 - servomotor (for an upcoming feature)
+- 3D Printer for the case
+
+## Case 3D Model
