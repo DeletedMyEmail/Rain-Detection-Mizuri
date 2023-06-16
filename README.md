@@ -14,9 +14,13 @@ The project was initializied via the VsCode extention PlatformIO. It's an easy w
 
 ## Requierements
 
-- ESP32 (Wifi Dev Kit V1)
+- ESP32 (e.g. NodeMCU-32s)
 - Arduino Rain Sensor (e.g. Modul FC-37)
 - servomotor (for an upcoming feature)
 - 3D Printer for the case
+
+## Wiring
+
+![](img/layout.jpg)
 
 ## Case 3D Model

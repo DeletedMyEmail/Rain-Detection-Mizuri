@@ -4,11 +4,11 @@
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
 
-const char* ssid = "wifi name";
-const char* password = "wifi password";
+const char* ssid = "";
+const char* password = "";
 
-const char* apiToken = "yourToken";
-const char* userToken = "yourToken";
+const char* apiToken = "";
+const char* userToken = "";
 const char *PUSHOVER_API_URL = "https://api.pushover.net/1/messages.json";
 const char *PUSHOVER_ROOT_CA = "-----BEGIN CERTIFICATE-----\n"
                  "MIIDrzCCApegAwIBAgIQCDvgVpBCRrGhdWrJWZHHSjANBgkqhkiG9w0BAQUFADBh\n"
@@ -34,48 +34,12 @@ const char *PUSHOVER_ROOT_CA = "-----BEGIN CERTIFICATE-----\n"
                  "-----END CERTIFICATE-----\n";
 
 unsigned long sinceResponds = 0;
-unsigned long respondsInterval = 100; 
+unsigned long respondsInterval = 10; 
 
-// TODO: idk which pins are connected
-const int sensorPowerPin;
-const int digitalSensorPin;
-const int analogSensorPin;
+const int sensorPowerPin = 4;
+const int digitalSensorPin = 5;
+const int analogSensorPin = A0; 
 
-void setup() {
-  Serial.begin(115200);
-  pinMode(sensorPowerPin, OUTPUT);
-  pinMode(digitalSensorPin, INPUT);
-  pinMode(analogSensorPin, INPUT);
-  initWiFi();
-  notifyClient("Info", "Moisture Sensor Mizuri Online!");
-}
-
-void loop() {
-  digitalWrite(sensorPowerPin, HIGH);
-  
-  if (sinceResponds < respondsInterval && WiFi.status() != WL_CONNECTED) {
-    Serial.println("Reconnecting to WiFi...");
-    WiFi.disconnect();
-    WiFi.reconnect();
-    delay(1000);
-    while (WiFi.status() != WL_CONNECTED) {
-      notifyClient("Warning", "Connection lost");
-      delay(5000);
-    }
-  }
-  else if (sinceResponds < respondsInterval) {
-    sinceResponds = 0;
-  }
-  else {
-    if (digitalRead(digitalSensorPin) == 0) {
-      notifyClient("Warning", "Moisture detected! Analog value: " + analogRead(analogSensorPin));
-    }
-    sinceResponds++;
-  }
-  
-  digitalWrite(sensorPowerPin, LOW);
-  delay(8000);
-}
 
 void initWiFi() {
   WiFi.mode(WIFI_STA);
@@ -89,7 +53,7 @@ void initWiFi() {
   }
   Serial.println(WiFi.localIP());
 }
-// hi
+
 void notifyClient(const char* title, const char* message) {
     StaticJsonDocument<512> notification; 
     notification["token"] = apiToken; 
@@ -105,5 +69,40 @@ void notifyClient(const char* title, const char* message) {
     https.addHeader("Content-Type", "application/json");
 
     int httpResponseCode = https.POST(jsonStringNotification);
-    Serial.println(httpResponseCode);
+}
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(sensorPowerPin, OUTPUT);
+  pinMode(digitalSensorPin, INPUT);
+  pinMode(analogSensorPin, INPUT);
+  initWiFi();
+  notifyClient("Info", "Moisture Sensor Mizuri Online!");
+  digitalWrite(sensorPowerPin, HIGH);
+}
+
+void loop() {
+  
+  if (sinceResponds > respondsInterval && WiFi.status() != WL_CONNECTED) {
+    Serial.println("Reconnecting to WiFi...");
+    WiFi.disconnect();
+    WiFi.reconnect();
+    delay(1000);
+    while (WiFi.status() != WL_CONNECTED) {
+      Serial.println("Connection lost");
+      delay(5000);
+    }
+  }
+  else if (sinceResponds > respondsInterval) {
+    sinceResponds = 0;
+  }
+  else {
+    if (digitalRead(digitalSensorPin) == 0) {
+      notifyClient("Warning", "Moisture detected! Analog value: " + analogRead(analogSensorPin));
+      delay(5000);
+    }
+    sinceResponds++;
+  }
+  
+  delay(80);
 }
