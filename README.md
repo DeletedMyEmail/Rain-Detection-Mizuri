@@ -1,4 +1,4 @@
-# Rain Detection Mizuri
+# RainDetector
 
 ## About The Project
 
